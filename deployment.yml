@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minecraft
+spec:
+  selector:
+    matchLabels:
+      app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      volumes:
+        - name: minecraft-pv
+          persistentVolumeClaim:
+            claimName: minecraft-pv
+      containers:
+      - name: minecraft
+        image: itzg/minecraft-server
+        volumeMounts:
+          - mountPath: /data
+            name: minecraft-pv
+        env:
+          - name: EULA
+            value: "TRUE"
+        ports:
+        - containerPort: 25565
+          name: mc
+        - containerPort: 25575
+          name: rcon 
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft
+spec:
+  selector:
+    app: minecraft
+  type: LoadBalancer
+  ports:
+  - port: 25565
+    targetPort: 25565
+    nodePort: 30000
